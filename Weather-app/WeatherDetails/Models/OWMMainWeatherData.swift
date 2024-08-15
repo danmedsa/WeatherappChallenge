@@ -12,5 +12,5 @@ struct OWMMainWeatherData {
     var feelsLike: Float
     var tempMin: Float
     var tempMax: Float
-    var humidity: Float
+    var humidity: Int
 }
