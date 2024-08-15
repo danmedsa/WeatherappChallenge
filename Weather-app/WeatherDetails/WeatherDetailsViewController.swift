@@ -7,7 +7,13 @@
 
 import UIKit
 
-class WeatherDetailsViewController: UIViewController {
+protocol WeatherDetailsViewControlling: AnyObject {
+    var presenter: WeatherDetailsPresenting { get }
+}
+
+class WeatherDetailsViewController: UIViewController, WeatherDetailsViewControlling {
+    
+    private var loadingIndicator = LoadingIndicatorView()
     
     private lazy var mainStackView: UIStackView = {
         let stackView = UIStackView()
@@ -16,22 +22,25 @@ class WeatherDetailsViewController: UIViewController {
         return stackView
     }()
     
+    var presenter: WeatherDetailsPresenting
+    
+    init(presenter: WeatherDetailsPresenting) {
+        self.presenter = presenter
+        super.init(nibName: nil, bundle: nil)
+    }
+    
     // not needed as Storyboard is not used
     required init?(coder: NSCoder) {
         fatalError("View Controller Should not be used with Storyboard")
     }
-    
-    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
-        super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
-    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .defaultBackgroundColor
         configureView()
     }
     
     private func configureView() {
-        view.backgroundColor = .white
         addMainStackView()
         addSearchBar()
         addTemperatureDataView()
@@ -53,23 +62,24 @@ class WeatherDetailsViewController: UIViewController {
     }
     
     private func addSearchBar() {
-        let viewModel = SearchBarView.ViewModel(placeholderText: "search City or State in the US")
+        let viewModel = SearchBarView.ViewModel(placeholderText: presenter.contentProvider.searchBarPlaceholder)
         let searchBar = SearchBarView(viewModel: viewModel)
+        searchBar.delegate = self
         mainStackView.addArrangedSubview(searchBar)
-        mainStackView.setCustomSpacing(8,after: searchBar)
+        mainStackView.setCustomSpacing(8, after: searchBar)
     }
     
     private func addTemperatureDataView() {
         let weather = Weather(id: 500, main: "Rain", description: "light rain", icon: "10n")
-        let viewModel = TemperatureDataView.ViewModel(title: "Current weather:", weather: weather)
+        let viewModel = TemperatureDataView.ViewModel(title: presenter.contentProvider.currentWeatherTitle, weather: weather)
         let tempView = TemperatureDataView(viewModel: viewModel)
         
         mainStackView.addArrangedSubview(tempView)
     }
     
     private func addCouldinessDataView() {
-        let cloudinessLbl = makeLabelWithKeyValueText(title: "Cloudiness", int: 30)
-        cloudinessLbl.text = "\(cloudinessLbl.text ?? "")%" // TODO: Presenter.getCloudinessText
+        let cloudinessLbl = makeLabelWithKeyValueText(title: presenter.contentProvider.cloudinessTitle, int: 30)
+        cloudinessLbl.text = "\(cloudinessLbl.text ?? "")".asPercentage
         mainStackView.addArrangedSubview(cloudinessLbl)
     }
     
@@ -77,18 +87,18 @@ class WeatherDetailsViewController: UIViewController {
         let rain = OWMWeatherVolumeData(oneHour: 0.2, threeHour: nil)
         var rainSubViews: [UIView] = []
         if let oneHourData = rain.oneHour {
-            let oneHourLbl = makeLabelWithKeyValueText(title: "1hr", float: oneHourData)
+            let oneHourLbl = makeLabelWithKeyValueText(title: presenter.contentProvider.oneHourTitle, float: oneHourData)
             rainSubViews.append(oneHourLbl)
         }
         
         if let threeHourData = rain.threeHour {
-            let threeHourLbl = makeLabelWithKeyValueText(title: "3hr", float: threeHourData)
+            let threeHourLbl = makeLabelWithKeyValueText(title: presenter.contentProvider.threeHourTitle, float: threeHourData)
             rainSubViews.append(threeHourLbl)
         }
         
         if !rainSubViews.isEmpty {
             let title = UILabel()
-            title.text = "Rain Data:"
+            title.text = presenter.contentProvider.rainDataTitle.asTitle
             rainSubViews.insert(title, at: 0)
             let rainStackView = makeDefaultStackView(arrangedViews: rainSubViews, axis: .horizontal)
             rainStackView.distribution = .fillProportionally
@@ -98,18 +108,18 @@ class WeatherDetailsViewController: UIViewController {
         let snow = OWMWeatherVolumeData(oneHour: nil, threeHour: nil)
         var snowSubviews: [UIView] = []
         if let oneHourData = snow.oneHour {
-            let oneHourLbl = makeLabelWithKeyValueText(title: "1hr", float: oneHourData)
+            let oneHourLbl = makeLabelWithKeyValueText(title: presenter.contentProvider.oneHourTitle, float: oneHourData)
             snowSubviews.append(oneHourLbl)
         }
         
         if let threeHourData = snow.threeHour {
-            let threeHourLbl = makeLabelWithKeyValueText(title: "3hr", float: threeHourData)
+            let threeHourLbl = makeLabelWithKeyValueText(title: presenter.contentProvider.threeHourTitle, float: threeHourData)
             snowSubviews.append(threeHourLbl)
         }
         
         if !snowSubviews.isEmpty {
             let title = UILabel()
-            title.text = "Snow Data:"
+            title.text = presenter.contentProvider.snowDataTitle.asTitle
             snowSubviews.insert(title, at: 0)
             let snowStackView = makeDefaultStackView(arrangedViews: snowSubviews, axis: .horizontal)
             snowStackView.distribution = .fillProportionally
@@ -118,13 +128,12 @@ class WeatherDetailsViewController: UIViewController {
     }
     
     private func addMainWeatherDataView() {
-        let data = OWMMainWeatherData(temp: 39.4, feelsLike: 40, tempMin: 29, tempMax: 42, humidity: 68)
-        let tempLbl = makeLabelWithKeyValueText(title: "temp", float: data.temp)
-        let feelsLikeLbl = makeLabelWithKeyValueText(title: "feels like", float: data.feelsLike)
-        let tempMinLbl = makeLabelWithKeyValueText(title: "min", float: data.tempMin)
-        let tempMaxLbl = makeLabelWithKeyValueText(title: "max", float: data.tempMax)
-        let humidityLbl = makeLabelWithKeyValueText(title: "humidity", int: data.humidity)
-        humidityLbl.text = "\(humidityLbl.text ?? "")%" // TODO: Presenter.getHumidityText
+        let tempLbl = makeLabelWithKeyValueText(title: presenter.contentProvider.tempTitle, float: 39.4)
+        let feelsLikeLbl = makeLabelWithKeyValueText(title: presenter.contentProvider.feelsLikeTitle, float: 40)
+        let tempMinLbl = makeLabelWithKeyValueText(title: presenter.contentProvider.tempMinTitle, float: 34)
+        let tempMaxLbl = makeLabelWithKeyValueText(title: presenter.contentProvider.tempMaxTitle, float: 42)
+        let humidityLbl = makeLabelWithKeyValueText(title: presenter.contentProvider.humidityTitle, int: 35)
+        humidityLbl.text = "\(humidityLbl.text ?? "Unkown")".asPercentage
         
         let tempStackView = makeDefaultStackView(arrangedViews: [tempLbl, feelsLikeLbl], axis: .horizontal)
         mainStackView.addArrangedSubview(tempStackView)
@@ -134,11 +143,10 @@ class WeatherDetailsViewController: UIViewController {
     }
     
     private func addWindSpeedAndVisibility() {
-        let windspeedLbl = makeLabelWithKeyValueText(title: "wind speed", float: 34.5)
-        windspeedLbl.text = "\(windspeedLbl.text ?? "") mph" // TODO: presenter.getWindSpeed
-        
-        let visibilityLbl = makeLabelWithKeyValueText(title: "visibility", int: 1000)
-        visibilityLbl.text = "\(visibilityLbl.text ?? "") miles" // TODO: presenter.getvisibility
+        let windspeedLbl = makeLabelWithKeyValueText(title: presenter.contentProvider.windSpeedTitle, float: 34.5)
+        windspeedLbl.text = "\(windspeedLbl.text ?? "") \(presenter.contentProvider.mphText)"
+        let visibilityLbl = makeLabelWithKeyValueText(title: presenter.contentProvider.visibilityTitle, int: 1000)
+        visibilityLbl.text = "\(visibilityLbl.text ?? "") \(presenter.contentProvider.milesText)"
         
         let stackView = makeDefaultStackView(arrangedViews: [windspeedLbl, visibilityLbl], axis: .horizontal)
         mainStackView.addArrangedSubview(stackView)
@@ -149,13 +157,13 @@ class WeatherDetailsViewController: UIViewController {
     
     private func makeLabelWithKeyValueText(title: String, int: Int) -> UILabel {
         let label = UILabel()
-        label.text = title + ": \(int)"
+        label.text = title.asTitle + "\(int)"
         return label
     }
     
     private func makeLabelWithKeyValueText(title: String, float: Float) -> UILabel {
         let label = UILabel()
-        label.text = title + ": \(float)"
+        label.text = title.asTitle + "\(float)"
         return label
     }
     
@@ -166,5 +174,20 @@ class WeatherDetailsViewController: UIViewController {
         stackView.distribution = .equalCentering
         stackView.alignment = .leading
         return stackView
+    }
+}
+
+extension WeatherDetailsViewController: UISearchBarDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        guard let searchText = searchBar.text else { return }
+        loadingIndicator.show(in: self)
+        Task {
+            do {
+                try await presenter.fetchWeatherData(location: searchText)
+            } catch {
+                print(error)
+            }
+            loadingIndicator.hide()
+        }
     }
 }

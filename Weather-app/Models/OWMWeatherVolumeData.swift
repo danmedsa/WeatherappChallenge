@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct OWMWeatherVolumeData {
+struct OWMWeatherVolumeData: Decodable {
     var oneHour: Float?
     var threeHour: Float?
 }

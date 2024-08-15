@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Weather {
+struct Weather: Decodable {
     var id: Int
     var main: String
     var description: String
