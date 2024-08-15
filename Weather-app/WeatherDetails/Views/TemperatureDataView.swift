@@ -39,7 +39,8 @@ class TemperatureDataView: UIStackView {
         weatherDataStackView.axis = .horizontal
         weatherDataStackView.spacing = 8
         addArrangedSubview(weatherDataStackView)
-
+        addMainWeatherView(imageName: weather.icon, to: weatherDataStackView)
+        addWeatherText(text: weather.main, to: weatherDataStackView)
     }
     
     private func addMainWeatherView(imageName: String, to stackView: UIStackView) {
@@ -48,8 +49,9 @@ class TemperatureDataView: UIStackView {
         imageView.backgroundColor = .red
         imageView.contentMode = .scaleAspectFit
         NSLayoutConstraint.activate([
-            NSLayoutConstraint(item: imageView, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .height, multiplier: 1, constant: 40),
-            NSLayoutConstraint(item: imageView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .width, multiplier: 1, constant: 40),
+            NSLayoutConstraint(item: imageView, attribute: .height, relatedBy: .lessThanOrEqual, toItem: nil, attribute: .height, multiplier: 1, constant: 40),
+            NSLayoutConstraint(item: imageView, attribute: .width, relatedBy: .lessThanOrEqual, toItem: imageView, attribute: .height, multiplier: 1, constant: 0),
+
         ])
         stackView.addArrangedSubview(imageView)
     }

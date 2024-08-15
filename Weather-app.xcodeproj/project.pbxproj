@@ -111,6 +111,7 @@
 		7082FE2D2C6E5F470028384F /* Weather-app */ = {
 			isa = PBXGroup;
 			children = (
+				7082FE6A2C6E69DD0028384F /* Models */,
 				7082FE602C6E622C0028384F /* WeatherDetails */,
 				7082FE2E2C6E5F470028384F /* AppDelegate.swift */,
 				7082FE302C6E5F470028384F /* SceneDelegate.swift */,
@@ -141,7 +142,6 @@
 		7082FE602C6E622C0028384F /* WeatherDetails */ = {
 			isa = PBXGroup;
 			children = (
-				7082FE6A2C6E69DD0028384F /* Models */,
 				7082FE652C6E62AC0028384F /* Views */,
 				7082FE322C6E5F470028384F /* WeatherDetailsViewController.swift */,
 			);
