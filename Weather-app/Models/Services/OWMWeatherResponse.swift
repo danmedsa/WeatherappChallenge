@@ -17,7 +17,7 @@ struct OWMWeatherResponse: Decodable {
     var windSpeed: Float
     var rain: OWMWeatherVolumeData?
     var snow: OWMWeatherVolumeData?
-    var cloulds: OWMCloudData
+    var clouds: OWMCloudData
     
     enum CodingKeys: String, CodingKey {
         case locationName = "name"
@@ -50,6 +50,6 @@ struct OWMWeatherResponse: Decodable {
         windSpeed = try windContainer.decode(Float.self, forKey: .speed)
         rain = try? container.decode(OWMWeatherVolumeData.self, forKey: .rain)
         snow = try? container.decode(OWMWeatherVolumeData.self, forKey: .snow)
-        cloulds = try container.decode(OWMCloudData.self, forKey: .clouds)
+        clouds = try container.decode(OWMCloudData.self, forKey: .clouds)
     }
 }

@@ -5,6 +5,6 @@
 	<key>apiKey</key>
 	<string>56a24e987d639048ef964a2bc27d6c0e</string>
 	<key>url</key>
-	<string>api.openweathermap.org</string>
+	<string>openweathermap.org</string>
 </dict>
 </plist>

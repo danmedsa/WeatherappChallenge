@@ -26,8 +26,15 @@ protocol WeatherDetailsContentProviding {
     var kilometersText: String { get }
     var mphText: String { get }
     var kmhText: String { get }
+    var noWeatherDataMessasge: String { get }
+    var errorAlertTitle: String { get }
+    var okAlertActionTitle: String { get }
+    var locateMeText: String { get }
+    var celcius: String { get }
+    var farenheit: String { get }
 }
 
+// Could implement localizable here to handle different languages
 struct WeatherDetailsContentProvider: WeatherDetailsContentProviding {
     var searchBarPlaceholder: String { "search City or State in the US" }
     
@@ -65,5 +72,15 @@ struct WeatherDetailsContentProvider: WeatherDetailsContentProviding {
     
     var kmhText: String { "kmh" }
     
+    var noWeatherDataMessasge: String { "Unable to find any weather data for location." }
     
+    var errorAlertTitle: String { "Error" }
+    
+    var okAlertActionTitle: String { "Ok" }
+    
+    var locateMeText: String { "Locate Me" }
+    
+    var celcius: String { "C" }
+    
+    var farenheit: String { "F" }
 }

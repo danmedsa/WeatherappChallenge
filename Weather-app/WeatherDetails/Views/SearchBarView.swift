@@ -10,11 +10,15 @@ import UIKit
 class SearchBarView: UISearchBar {
     struct ViewModel {
         var placeholderText: String
+        var location: String?
     }
     
     init(viewModel: ViewModel) {
         super.init(frame: .zero)
         placeholder = viewModel.placeholderText
+        if let location = viewModel.location {
+            text = location
+        }
     }
     
     override init(frame: CGRect) {
